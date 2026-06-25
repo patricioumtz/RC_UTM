@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Generador de UTMs — Refaccionaria California</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rc-blue: #1A3A8F;
+    --rc-red:  #CC1F26;
+    --gray-50:  #F8F8F8;
+    --gray-100: #F0F0F0;
+    --gray-200: #E0E0E0;
+    --gray-400: #9E9E9E;
+    --gray-700: #444;
+    --gray-900: #111;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--gray-50);
+    color: var(--gray-900);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  header {
+    background: var(--rc-blue);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    border-bottom: 3px solid var(--rc-red);
+  }
+  header .brand {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .02em;
+  }
+  header .version {
+    color: rgba(255,255,255,.5);
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+
+  /* Layout */
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--rc-blue);
+    margin-bottom: .25rem;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--gray-400);
+    margin-bottom: 2rem;
+  }
+
+  /* Section title */
+  .stitle {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--gray-400);
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 5px;
+    margin: 1.75rem 0 .875rem;
+  }
+
+  /* Card */
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.125rem 1.25rem;
+    margin-bottom: .75rem;
+  }
+
+  /* Rules */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .rule {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .rule-num {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-200);
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 18px;
+  }
+  .rule-text {
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+  .rule-text strong { font-weight: 600; color: var(--gray-900); }
+  .rule-text code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+  /* Tipo canal */
+  .tipo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .tipo-btn {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 12px 8px 10px;
+    cursor: pointer;
+    text-align: center;
+    background: #fff;
+    font-size: 12px;
+    color: var(--gray-700);
+    font-family: var(--font);
+    transition: border-color .15s, background .15s;
+  }
+  .tipo-btn svg { display: block; margin: 0 auto 6px; opacity: .5; }
+  .tipo-btn:hover { border-color: var(--rc-blue); background: #f0f4ff; }
+  .tipo-btn.active {
+    border-color: var(--rc-blue);
+    background: #EEF2FF;
+    color: var(--rc-blue);
+    font-weight: 600;
+  }
+  .tipo-btn.active svg { opacity: 1; }
+
+  /* Destinos */
+  .destino-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .destino-btn {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    cursor: pointer;
+    background: #fff;
+    font-size: 12px;
+    text-align: left;
+    color: var(--gray-700);
+    font-family: var(--font);
+    transition: border-color .15s;
+  }
+  .destino-btn small {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--gray-400);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .destino-btn:hover { border-color: var(--rc-blue); }
+  .destino-btn.active { border-color: var(--rc-blue); background: #EEF2FF; color: var(--rc-blue); }
+
+  /* Form elements */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--gray-700);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--gray-400);
+    margin-left: 4px;
+    font-weight: 400;
+  }
+  input[type="text"],
+  input[type="date"] {
+    width: 100%;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: var(--font);
+    color: var(--gray-900);
+    background: #fff;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input[type="text"]:focus,
+  input[type="date"]:focus { border-color: var(--rc-blue); }
+  input[readonly] { background: var(--gray-50); color: var(--gray-400); cursor: default; }
+
+  /* Medios */
+  .medio-list { display: flex; flex-direction: column; gap: 8px; }
+  .medio-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: .875rem 1rem;
+  }
+  .medio-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .medio-label { font-size: 13px; font-weight: 600; }
+  .medio-source { font-family: var(--mono); font-size: 11px; color: var(--gray-400); margin-left: 8px; }
+  .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .del-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-400);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    line-height: 1;
+    font-size: 16px;
+    transition: color .15s;
+  }
+  .del-btn:hover { color: var(--rc-red); }
+
+  /* Mail links */
+  .mail-link-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    align-items: end;
+    margin-bottom: 8px;
+  }
+
+  /* Add button */
+  .add-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px dashed var(--gray-200);
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--gray-400);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: border-color .15s, color .15s;
+  }
+  .add-btn:hover { border-color: var(--rc-blue); color: var(--rc-blue); }
+
+  /* Generate button */
+  .gen-btn {
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 12px;
+    background: var(--rc-blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .gen-btn:hover { background: #142d72; }
+
+  /* Status */
+  .status {
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    margin: 10px 0;
+  }
+  .status.err { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .status.ok  { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+
+  /* Results */
+  #resultados { margin-top: 1.75rem; }
+  .result-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 11px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+  .url-mono {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--gray-400);
+    word-break: break-all;
+    flex: 1;
+  }
+
+  /* Download buttons */
+  .btn-row { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
+  .dl-btn {
+    padding: 9px 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    color: var(--gray-700);
+    font-weight: 500;
+    transition: border-color .15s, background .15s;
+  }
+  .dl-btn:hover { border-color: var(--rc-blue); background: #EEF2FF; color: var(--rc-blue); }
+  .dl-btn:disabled { opacity: .5; cursor: default; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--gray-400);
+    padding: 2rem 0 1rem;
+    border-top: 1px solid var(--gray-200);
+    margin-top: 3rem;
+  }
+
+  /* Canal panels */
+  .canal-panel { display: none; }
+  .canal-panel.active { display: block; }
+
+  @media (max-width: 520px) {
+    .rules-grid, .grid2, .date-row, .destino-grid { grid-template-columns: 1fr; }
+    .tipo-grid { grid-template-columns: 1fr; }
+    .mail-link-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="brand">Refaccionaria California &mdash; Generador de UTMs</span>
+  <span class="version">v2.0 · Jun 2026</span>
+</header>
+
+<main>
+  <h1>Generador de UTMs y QRs</h1>
+  <p class="subtitle">Genera links con seguimiento y códigos QR para campañas de Refaccionaria California.</p>
+
+  <!-- Reglas -->
+  <div class="stitle">Reglas de sintaxis</div>
+  <div class="card">
+    <div class="rules-grid">
+      <div class="rule">
+        <span class="rule-num">1</span>
+        <span class="rule-text">Siempre en <strong>minúsculas</strong> — sin excepción</span>
+      </div>
+      <div class="rule">
+        <span class="rule-num">2</span>
+        <span class="rule-text"><strong>Guiones bajos</strong> como separador: <code>lluvia_jun26</code></span>
+      </div>
+      <div class="rule">
+        <span class="rule-num">3</span>
+        <span class="rule-text">Sin <strong>acentos, eñes</strong> ni caracteres especiales</span>
+      </div>
+      <div class="rule">
+        <span class="rule-num">4</span>
+        <span class="rule-text">Fechas en formato <code>mmmaa</code>: <code>jun26</code>, <code>jul26</code></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tipo de canal -->
+  <div class="stitle">Tipo de canal</div>
+  <div class="tipo-grid" id="tipo-grid">
+    <button class="tipo-btn active" onclick="setTipo('periodico')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="13" y2="13"/></svg>
+      Periódico
+    </button>
+    <button class="tipo-btn" onclick="setTipo('boletin')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Boletín impreso
+    </button>
+    <button class="tipo-btn" onclick="setTipo('mailing')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+      Mailing
+    </button>
+  </div>
+
+  <!-- Panel periódico -->
+  <div id="panel-periodico" class="canal-panel active">
+    <div class="stitle">Medios y periodos</div>
+    <div id="medios-list" class="medio-list"></div>
+    <button class="add-btn" onclick="addMedio()">+ Agregar medio</button>
+  </div>
+
+  <!-- Panel boletín -->
+  <div id="panel-boletin" class="canal-panel">
+    <div class="stitle">Boletín impreso</div>
+    <div class="card">
+      <div class="grid2">
+        <div class="field">
+          <label>Tipo de formato <span class="badge">utm_source</span></label>
+          <input type="text" id="bol-source" value="boletin_impreso" />
+        </div>
+        <div class="field">
+          <label>Fecha del boletín</label>
+          <input type="date" id="bol-fecha" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Nombre de anuncio <span class="badge">utm_content</span></label>
+        <input type="text" id="bol-content" placeholder="ej. qr_acumuladores_jun26" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel mailing -->
+  <div id="panel-mailing" class="canal-panel">
+    <div class="stitle">Mailing</div>
+    <div class="card">
+      <div class="grid2">
+        <div class="field">
+          <label>Nombre campaña <span class="badge">utm_campaign</span></label>
+          <input type="text" id="mail-campaign" placeholder="ej. lluvia_jul26" />
+        </div>
+        <div class="field">
+          <label>Plataforma de mailing <span class="badge">utm_source</span></label>
+          <input type="text" id="mail-source" value="mailchimp" />
+        </div>
+      </div>
+      <div id="mail-links-list"></div>
+      <button class="add-btn" onclick="addMailLink()">+ Agregar link del mailing</button>
+    </div>
+  </div>
+
+  <!-- Destino -->
+  <div class="stitle">Destino</div>
+  <div class="card">
+    <div class="destino-grid" id="destino-grid"></div>
+    <div class="field">
+      <label>O escribe una URL libre</label>
+      <input type="text" id="destino-libre" placeholder="https://www.refaccionariacalifornia.com.mx/..." oninput="selDestino(null)" />
+    </div>
+  </div>
+
+  <!-- Parámetros -->
+  <div class="stitle">Parámetros de campaña</div>
+  <div class="card">
+    <div class="grid2">
+      <div class="field">
+        <label>Nombre campaña <span class="badge">utm_campaign</span></label>
+        <input type="text" id="campaign" value="periodicos_jun26" />
+      </div>
+      <div class="field">
+        <label>Tipo de medio <span class="badge">utm_medium</span></label>
+        <input type="text" id="medium-display" readonly />
+      </div>
+    </div>
+  </div>
+
+  <div id="status-main"></div>
+  <button class="gen-btn" onclick="generar()">⚡ Generar UTMs y QRs</button>
+
+  <!-- Resultados -->
+  <div id="resultados" style="display:none;">
+    <div class="stitle">Resultado — <span id="count-label"></span></div>
+    <div class="card" style="padding:.75rem 1.25rem;">
+      <div id="lista-resultados"></div>
+    </div>
+    <div class="btn-row">
+      <button class="dl-btn" onclick="descargarExcel()">↓ Descargar Excel</button>
+      <button class="dl-btn" id="btn-qr" onclick="descargarQRs()">↓ Descargar QRs (ZIP)</button>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Generador UTM · Refaccionaria California · Preparado por Patricio Uribe Martínez, Gerente de Crecimiento Digital
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const TIPOS = [
+  { id: 'periodico', medium: 'print',  campaign: 'periodicos_jun26' },
+  { id: 'boletin',   medium: 'print',  campaign: 'boletin_qr' },
+  { id: 'mailing',   medium: 'email',  campaign: 'lluvia_jun26' },
+];
+
+const DESTINOS = [
+  { label: 'Acumuladores',            url: 'https://www.refaccionariacalifornia.com.mx/enc_acumulador' },
+  { label: 'Plumas limpiaparabrisas', url: 'https://www.refaccionariacalifornia.com.mx/col_plumasLimpiaparabrisasDepositos' },
+  { label: 'Suspensión y dirección',  url: 'https://www.refaccionariacalifornia.com.mx/suspensionDireccion' },
+  { label: 'Encuentra tu sucursal',   url: 'https://www.refaccionariacalifornia.com.mx/encuentra-tu-sucursal' },
+  { label: 'Página principal',        url: 'https://www.refaccionariacalifornia.com.mx/' },
+  { label: 'Rain-X',                  url: 'https://www.refaccionariacalifornia.com.mx/buscar?q=raimsa&search-button=&lang=es_MX' },
+];
+
+const MEDIOS_DEFAULT = [
+  { label: 'Cancha Página 3',    source: 'cancha_p3' },
+  { label: 'Cancha Tabla Pos.',  source: 'cancha_tabla' },
+  { label: 'Metro',              source: 'periodico_metro' },
+  { label: 'Universal',          source: 'periodico_universal' },
+  { label: 'Gráfico',            source: 'periodico_grafico' },
+  { label: 'Gráfico Tabla Pos.', source: 'grafico_tabla' },
+];
+
+let tipoActivo = 'periodico';
+let destinoActivo = 0;
+let medios = JSON.parse(JSON.stringify(MEDIOS_DEFAULT));
+let mailLinks = [];
+let generatedRows = [];
+
+function init() {
+  renderDestinos();
+  renderMedios();
+  setTipo('periodico');
+}
+
+function setTipo(id) {
+  tipoActivo = id;
+  document.querySelectorAll('.tipo-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['periodico','boletin','mailing'][i] === id);
+  });
+  document.querySelectorAll('.canal-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const t = TIPOS.find(x => x.id === id);
+  document.getElementById('medium-display').value = t.medium;
+  if (id !== 'mailing') document.getElementById('campaign').value = t.campaign;
+}
+
+function renderDestinos() {
+  document.getElementById('destino-grid').innerHTML = DESTINOS.map((d, i) =>
+    `<button class="destino-btn${i === destinoActivo ? ' active' : ''}" onclick="selDestino(${i})">
+      ${d.label}<small>${d.url.replace('https://www.refaccionariacalifornia.com.mx', '') || '/'}</small>
+    </button>`
+  ).join('');
+}
+
+function selDestino(i) {
+  destinoActivo = i;
+  document.getElementById('destino-libre').value = '';
+  renderDestinos();
+}
+
+function getDestino() {
+  return document.getElementById('destino-libre').value.trim() || DESTINOS[destinoActivo]?.url || '';
+}
+
+function fmtFecha(s) {
+  const d = new Date(s + 'T12:00:00');
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return String(d.getDate()).padStart(2, '0') + meses[d.getMonth()];
+}
+
+function dateRange(start, end) {
+  if (!start || !end) return [];
+  const dates = [];
+  const s = new Date(start + 'T12:00:00');
+  const e = new Date(end + 'T12:00:00');
+  for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1))
+    dates.push(fmtFecha(d.toISOString().split('T')[0]));
+  return dates;
+}
+
+function renderMedios() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('medios-list').innerHTML = medios.map((m, i) => `
+    <div class="medio-card">
+      <div class="medio-header">
+        <div>
+          <span class="medio-label">${m.label}</span>
+          <span class="medio-source">${m.source}</span>
+        </div>
+        <button class="del-btn" onclick="delMedio(${i})" aria-label="Eliminar medio">✕</button>
+      </div>
+      <div class="date-row">
+        <div class="field" style="margin:0;">
+          <label>Fecha inicio</label>
+          <input type="date" id="start-${i}" value="${today}" />
+        </div>
+        <div class="field" style="margin:0;">
+          <label>Fecha fin</label>
+          <input type="date" id="end-${i}" value="${today}" />
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function addMedio() {
+  const label = prompt('Nombre del medio:');
+  if (!label) return;
+  const source = prompt('utm_source (minúsculas, guiones bajos):');
+  if (!source) return;
+  medios.push({ label, source });
+  renderMedios();
+}
+
+function delMedio(i) { medios.splice(i, 1); renderMedios(); }
+
+function renderMailLinks() {
+  document.getElementById('mail-links-list').innerHTML = mailLinks.map((l, i) => `
+    <div class="mail-link-row">
+      <div class="field" style="margin:0;">
+        <label>Descripción</label>
+        <input type="text" value="${l.desc}" oninput="mailLinks[${i}].desc=this.value" placeholder="ej. Banner principal" />
+      </div>
+      <div class="field" style="margin:0;">
+        <label>Nombre de anuncio <span class="badge">utm_content</span></label>
+        <input type="text" value="${l.content}" oninput="mailLinks[${i}].content=this.value" placeholder="ej. banner_principal" />
+      </div>
+      <button class="del-btn" onclick="delMailLink(${i})" aria-label="Eliminar link" style="margin-bottom:1px;">✕</button>
+    </div>`).join('');
+}
+
+function addMailLink() { mailLinks.push({ desc: '', content: '' }); renderMailLinks(); }
+function delMailLink(i) { mailLinks.splice(i, 1); renderMailLinks(); }
+
+function generar() {
+  const rows = [];
+  const destino = getDestino();
+  const campaign = document.getElementById('campaign').value.trim();
+  const medium = document.getElementById('medium-display').value;
+  const sep = destino.includes('?') ? '&' : '?';
+  const today = new Date().toISOString().split('T')[0];
+
+  if (tipoActivo === 'periodico') {
+    medios.forEach((m, i) => {
+      const start = document.getElementById(`start-${i}`)?.value;
+      const end   = document.getElementById(`end-${i}`)?.value;
+      if (!start || !end) return;
+      dateRange(start, end).forEach(f => {
+        const content = `pub_${f}`;
+        const url = `${destino}${sep}utm_source=${m.source}&utm_medium=${medium}&utm_campaign=${campaign}&utm_content=${content}`;
+        const lbl = `${f.slice(0,2)}-${f.slice(2,5).charAt(0).toUpperCase()+f.slice(3,5)}-26`;
+        rows.push({ canal: `${m.label} — ${lbl}`, source: m.source, medium, campaign, content, url_destino: destino, url_completa: url, fecha: today, responsable: 'Patricio Uribe', estatus: 'Activo', notas: `Publicación ${lbl} — impreso` });
+      });
+    });
+  } else if (tipoActivo === 'boletin') {
+    const source  = document.getElementById('bol-source').value.trim();
+    const content = document.getElementById('bol-content').value.trim() || 'qr_boletin';
+    const url = `${destino}${sep}utm_source=${source}&utm_medium=${medium}&utm_campaign=${campaign}&utm_content=${content}`;
+    rows.push({ canal: `Boletín impreso — ${content}`, source, medium, campaign, content, url_destino: destino, url_completa: url, fecha: today, responsable: 'Patricio Uribe', estatus: 'Activo', notas: 'Boletín impreso' });
+  } else if (tipoActivo === 'mailing') {
+    const source = document.getElementById('mail-source').value.trim();
+    const camp   = document.getElementById('mail-campaign').value.trim() || campaign;
+    mailLinks.forEach(l => {
+      if (!l.content) return;
+      const url = `${destino}${sep}utm_source=${source}&utm_medium=email&utm_campaign=${camp}&utm_content=${l.content}`;
+      rows.push({ canal: `Mailing ${camp} — ${l.desc || l.content}`, source, medium: 'email', campaign: camp, content: l.content, url_destino: destino, url_completa: url, fecha: today, responsable: 'Patricio Uribe', estatus: 'Activo', notas: l.desc || '' });
+    });
+  }
+
+  if (!rows.length) {
+    document.getElementById('status-main').innerHTML = '<div class="status err">No hay datos suficientes. Revisa fechas o links.</div>';
+    return;
+  }
+
+  document.getElementById('status-main').innerHTML = '';
+  generatedRows = rows;
+  document.getElementById('count-label').textContent = `${rows.length} UTMs`;
+  document.getElementById('lista-resultados').innerHTML = rows.map(r => `
+    <div class="result-row">
+      <span class="tag">${r.source}</span>
+      <span class="tag">${r.content}</span>
+      <span class="url-mono">${r.url_completa}</span>
+    </div>`).join('');
+  document.getElementById('resultados').style.display = 'block';
+  document.getElementById('resultados').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function descargarExcel() {
+  if (!generatedRows.length) return;
+  const headers = ["Canal","Tipo de formato (utm_source)","Tipo de medio (utm_medium)","Nombre campaña (utm_campaign)","Nombre de anuncio (utm_content)","URL destino","URL completa con UTM","Fecha","Responsable","Estatus","Notas"];
+  const data = [headers, ...generatedRows.map(r => [r.canal, r.source, r.medium, r.campaign, r.content, r.url_destino, r.url_completa, r.fecha, r.responsable, r.estatus, r.notas])];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [40,22,12,20,22,22,80,12,18,10,30].map(w => ({ wch: w }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "UTMs RC");
+  XLSX.writeFile(wb, `UTMs_RC_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+async function descargarQRs() {
+  if (!generatedRows.length) return;
+  const btn = document.getElementById('btn-qr');
+  btn.disabled = true;
+  btn.textContent = 'Generando QRs...';
+  try {
+    const QRCode = await import('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm');
+    const zip = new JSZip();
+    for (const row of generatedRows) {
+      const svg = await QRCode.toString(row.url_completa, { type: 'svg', margin: 2 });
+      zip.file(`QR_${row.source}_${row.content}.svg`, svg);
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `QRs_RC_${new Date().toISOString().split('T')[0]}.zip`;
+    a.click();
+    document.getElementById('status-main').innerHTML = '<div class="status ok">QRs generados y descargados correctamente.</div>';
+  } catch (err) {
+    document.getElementById('status-main').innerHTML = `<div class="status err">Error generando QRs: ${err.message}</div>`;
+  }
+  btn.disabled = false;
+  btn.textContent = '↓ Descargar QRs (ZIP)';
+}
+
+init();
+</script>
+</body>
+</html>
