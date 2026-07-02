@@ -226,7 +226,11 @@ function renderDestinos() {
   ).join('');
 }
 
-function selDestino(i) { destinoActivo = i; document.getElementById('destino-libre').value = ''; renderDestinos(); }
+function selDestino(i) {
+  destinoActivo = i;
+  if (i !== null) document.getElementById('destino-libre').value = '';
+  renderDestinos();
+}
 function getDestino() { return document.getElementById('destino-libre').value.trim() || DESTINOS[destinoActivo]?.url || ''; }
 
 function fmtFecha(s) {
